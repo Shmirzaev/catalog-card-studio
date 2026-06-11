@@ -1,0 +1,3 @@
+# local extraction tooling — not part of the site
+*.py
+*.png

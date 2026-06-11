@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catalog Card Studio — Milana Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --espresso:#241b12;
+    --espresso-2:#2f2418;
+    --cream:#f3e8d3;
+    --paper:#e9dcc3;
+    --ink:#1e222f;
+    --red:#d14a44;
+    --red-dark:#b53a34;
+    --line:rgba(243,232,211,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Montserrat',sans-serif;
+    background:var(--paper);
+    background-image:radial-gradient(ellipse 80% 60% at 70% -10%, #f6ecd8 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    color:var(--ink);
+    display:flex;
+    min-height:100vh;
+  }
+
+  aside{
+    width:380px;flex:none;
+    background:var(--espresso);
+    color:var(--cream);
+    padding:28px 26px 40px;
+    overflow-y:auto;
+    box-shadow:8px 0 40px rgba(36,27,18,.25);
+  }
+  aside::-webkit-scrollbar{width:10px}
+  aside::-webkit-scrollbar-thumb{background:var(--espresso-2);border-radius:5px}
+
+  .brand{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+  .brand h1{font-family:'Fraunces',serif;font-weight:600;font-size:27px;letter-spacing:.5px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--red);transform:translateY(-2px)}
+  .tagline{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#b9a583;margin-bottom:26px}
+
+  fieldset{border:none;margin-bottom:24px}
+  legend{
+    font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+    color:var(--red);margin-bottom:12px;display:flex;align-items:center;gap:10px;width:100%;
+  }
+  legend::after{content:'';flex:1;height:1px;background:var(--line)}
+
+  label.fld{display:block;margin-bottom:11px}
+  label.fld span{display:block;font-size:11px;font-weight:600;letter-spacing:1px;color:#cdbb9b;margin-bottom:5px}
+  input[type=text]{
+    width:100%;padding:10px 12px;
+    background:var(--espresso-2);
+    border:1px solid var(--line);border-radius:9px;
+    color:var(--cream);font-family:Bahnschrift,'Segoe UI',sans-serif;font-size:16px;letter-spacing:1px;
+    transition:border-color .2s;
+  }
+  input[type=text]:focus{outline:none;border-color:var(--red)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  .chips{display:flex;gap:8px;margin-bottom:6px}
+  .chip{
+    flex:1;padding:10px 8px;text-align:center;cursor:pointer;
+    background:var(--espresso-2);border:1px solid var(--line);border-radius:10px;
+    font-size:12px;font-weight:600;color:#cdbb9b;
+    transition:border-color .2s,color .2s,background .2s;
+  }
+  .chip.on{border-color:var(--red);color:#fff;background:rgba(209,74,68,.16)}
+
+  .drop{
+    border:1.5px dashed rgba(243,232,211,.35);border-radius:12px;
+    padding:14px;text-align:center;cursor:pointer;
+    transition:border-color .2s, background .2s;
+    margin-bottom:10px;
+  }
+  .drop:hover,.drop.over{border-color:var(--red);background:rgba(209,74,68,.08)}
+  .drop strong{display:block;font-size:13px;margin-bottom:3px}
+  .drop em{font-size:11px;color:#b9a583;font-style:normal}
+  .drop.loaded{border-style:solid;border-color:#6f8f5a;background:rgba(111,143,90,.1)}
+
+  button{
+    font-family:'Montserrat',sans-serif;cursor:pointer;border:none;border-radius:9px;
+    transition:transform .12s, box-shadow .2s, background .2s;
+  }
+  button:active{transform:scale(.97)}
+  .ghost{
+    background:var(--espresso-2);color:var(--cream);
+    border:1px solid var(--line);
+    font-size:12px;font-weight:600;padding:9px 13px;width:100%;
+  }
+  .ghost:hover{border-color:#cdbb9b}
+  .ghost.on{border-color:var(--red);color:#ff8d85;background:rgba(209,74,68,.12)}
+
+  .sliderrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .sliderrow span{font-size:11px;font-weight:600;color:#cdbb9b;width:96px;flex:none;letter-spacing:.5px}
+  input[type=range]{flex:1;accent-color:var(--red);height:4px}
+  .checkrow{display:flex;align-items:center;gap:9px;margin-bottom:10px;font-size:13px}
+  .checkrow input{accent-color:var(--red);width:16px;height:16px}
+  select{
+    width:100%;padding:10px 12px;background:var(--espresso-2);color:var(--cream);
+    border:1px solid var(--line);border-radius:9px;font-family:'Montserrat',sans-serif;font-size:13px;
+  }
+
+  .download{
+    width:100%;padding:16px;margin-top:6px;
+    background:var(--red);color:#fff;
+    font-size:15px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+    box-shadow:0 8px 24px rgba(209,74,68,.35);
+  }
+  .download:hover{background:var(--red-dark)}
+  .hint{font-size:11px;color:#9b8a6c;line-height:1.6;margin-top:12px}
+  .hint b{color:#cdbb9b}
+
+  main{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:34px 30px;gap:14px;min-width:0;
+  }
+  .stagewrap{position:relative}
+  canvas#card{
+    display:block;
+    height:min(88vh, 1200px);
+    width:auto;max-width:100%;
+    border-radius:6px;
+    box-shadow:0 30px 80px rgba(60,42,20,.35), 0 4px 16px rgba(60,42,20,.2);
+    background:#d7ad7f;
+  }
+  canvas#card.pan{cursor:grab}
+  canvas#card.pan:active{cursor:grabbing}
+  canvas#card.pick{cursor:crosshair}
+  .stagenote{font-size:11.5px;letter-spacing:1.5px;text-transform:uppercase;color:#8a6f4d;font-weight:600}
+  .pickbanner{
+    position:absolute;top:14px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;font-size:12px;font-weight:600;
+    padding:8px 16px;border-radius:30px;letter-spacing:.5px;
+    box-shadow:0 6px 18px rgba(0,0,0,.3);display:none;white-space:nowrap;
+  }
+  .pickbanner.show{display:block;animation:pop .25s ease}
+  @keyframes pop{from{opacity:0;transform:translateX(-50%) translateY(-6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+  @media (max-width:920px){
+    body{flex-direction:column}
+    aside{width:100%;order:2}
+    main{order:1;padding:20px 12px}
+    canvas#card{height:auto;width:100%;max-height:none}
+  }
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="brand"><h1>Catalog Card Studio</h1><div class="dot"></div></div>
+  <div class="tagline">Milana Premium · from the AI template</div>
+
+  <fieldset>
+    <legend>Photo</legend>
+    <div class="drop" id="dropA">
+      <strong>Model photo</strong>
+      <em>click or drag an image here</em>
+    </div>
+    <input type="file" id="fileA" accept="image/*" hidden>
+    <div class="sliderrow"><span>Photo zoom</span><input type="range" id="scaleA" min="100" max="250" value="100"></div>
+    <div class="checkrow"><input type="checkbox" id="frame" checked><label for="frame">White frame around the picture</label></div>
+    <div class="hint" style="margin-top:0">Drag the photo on the preview to reposition it.</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Fabric badge</legend>
+    <div class="row2">
+      <label class="fld"><span>Fabric name</span><input type="text" id="fabric" value="Suprem"></label>
+      <label class="fld"><span>Composition</span><input type="text" id="comp" value="100% COTTON"></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Model &amp; Code</legend>
+    <div class="row2">
+      <label class="fld"><span>Model</span><input type="text" id="model" value="XJ-3062"></label>
+      <label class="fld"><span>Code</span><input type="text" id="code" value="V-4580"></label>
+    </div>
+    <label class="fld"><span>Text style</span>
+      <select id="mcStyle">
+        <option value="dark" selected>Dark</option>
+        <option value="light">White</option>
+      </select>
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Sizes</legend>
+    <label class="fld"><span>Comma separated</span><input type="text" id="sizes" value="50, 52, 54, 56, 58, 60"></label>
+  </fieldset>
+
+  <fieldset id="zoomGroup">
+    <legend>Fabric zoom circle</legend>
+    <div class="checkrow"><input type="checkbox" id="showZoom" checked><label for="showZoom">Show magnifier circle</label></div>
+    <button class="ghost" id="pickSpot">⌖ Pick fabric spot on preview</button>
+    <div class="sliderrow" style="margin-top:10px"><span>Magnification</span><input type="range" id="zoomMag" min="150" max="450" value="260"></div>
+    <div class="sliderrow"><span>Circle size</span><input type="range" id="zoomR" min="40" max="115" value="70"></div>
+    <div class="drop" id="dropF" style="margin-top:4px">
+      <strong>Close-up photo (optional)</strong>
+      <em>used inside the circle instead of magnifying</em>
+    </div>
+    <input type="file" id="fileF" accept="image/*" hidden>
+    <div class="sliderrow"><span>Picture zoom</span><input type="range" id="fabScale" min="100" max="350" value="100"></div>
+    <div class="hint" style="margin-top:0">Drag the circle on the preview to move it. <b>Shift + drag</b> inside the circle to move the picture; <b>scroll</b> over it to zoom.</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Branding</legend>
+    <label class="fld"><span>Logo style</span>
+      <select id="logoStyle">
+        <option value="auto" selected>Auto (white on photo, dark on light)</option>
+        <option value="light">White</option>
+        <option value="dark">Dark</option>
+      </select>
+    </label>
+    <div class="drop" id="dropL">
+      <strong>Own logo image (optional)</strong>
+      <em>replaces the Milana Premium logo</em>
+    </div>
+    <input type="file" id="fileL" accept="image/*" hidden>
+  </fieldset>
+
+  <fieldset>
+    <legend>Export</legend>
+    <div class="checkrow"><input type="checkbox" id="hires"><label for="hires">High-res ×2 (2944 × 4096)</label></div>
+    <button class="download" id="download">⬇ Download PNG</button>
+    <div class="hint">All positions, colors, fonts (Bahnschrift) and transparencies are taken 1:1 from the original Illustrator template.</div>
+  </fieldset>
+</aside>
+
+<main>
+  <div class="stagewrap">
+    <canvas id="card" width="1472" height="2048" class="pan"></canvas>
+    <div class="pickbanner" id="pickBanner">Click on the dress where the circle should magnify</div>
+  </div>
+  <div class="stagenote">Live preview · 1472 × 2048</div>
+</main>
+
+<script src="logo.js"></script>
+<script>
+(() => {
+  /* ════ geometry is in the .ai file's point space: page 690 × 959.76 pt ════ */
+  const PW = 690, PH = 959.76;
+  const H = 2048, K = H / PH, W = Math.round(PW * K); // 1472
+
+  const INK = '#1e222f', BLACK = '#000306', WHITE = '#ffffff';
+  const FONT = "Bahnschrift, 'Segoe UI', 'Arial Narrow', sans-serif";
+
+  const cv = document.getElementById('card');
+
+  const S = {
+    photoA: { img: null, scale: 1, ox: .5, oy: .42 },
+    fabricSlot: { img: null, scale: 1, ox: .5, oy: .5 },
+    logoImg: null, logoStyle: 'auto', mcStyle: 'dark',
+    fabric: 'Suprem', comp: '100% COTTON',
+    model: 'XJ-3062', code: 'V-4580',
+    sizes: '50, 52, 54, 56, 58, 60',
+    frame: true,
+    showZoom: true, zoomMag: 2.6,
+    zoomCx: 577.5, zoomCy: 824, zoomR: 70.3,
+    spotX: .655, spotY: .735,
+    picking: false
+  };
+
+  const logoDark = new Image(); logoDark.src = LOGO_DARK;
+  const logoLight = new Image(); logoLight.src = LOGO_LIGHT;
+  logoDark.onload = () => render();
+  logoLight.onload = () => render();
+
+  /* ──────────────── drawing helpers (all coords in pt) ──────────────── */
+  function makeDraw(ctx, k) {
+    const P = v => v * k;
+
+    function rrPath(x, y, w, h, r, keepPath) {
+      // r: number or [tl,tr,br,bl]
+      const rad = Array.isArray(r) ? r : [r, r, r, r];
+      const [tl, tr, br, bl] = rad.map(P);
+      x = P(x); y = P(y); w = P(w); h = P(h);
+      if (!keepPath) ctx.beginPath();
+      ctx.moveTo(x + tl, y);
+      ctx.arcTo(x + w, y, x + w, y + h, tr);
+      ctx.arcTo(x + w, y + h, x, y + h, br);
+      ctx.arcTo(x, y + h, x, y, bl);
+      ctx.arcTo(x, y, x + w, y, tl);
+      ctx.closePath();
+    }
+    function rect(x, y, w, h) { ctx.fillRect(P(x), P(y), P(w), P(h)); }
+    function text(str, x, y, sizePt, weight, color, align = 'center') {
+      ctx.font = `${weight} ${P(sizePt)}px ${FONT}`;
+      ctx.fillStyle = color;
+      ctx.textAlign = align;
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(str, P(x), P(y));
+    }
+    function measure(str, sizePt, weight) {
+      ctx.font = `${weight} ${P(sizePt)}px ${FONT}`;
+      return ctx.measureText(str).width / k;
+    }
+    return { P, rrPath, rect, text, measure };
+  }
+
+  // cover-fit a photo into a pt-space region
+  function coverRect(slot, rx, ry, rw, rh) {
+    const img = slot.img;
+    const s = Math.max(rw / img.width, rh / img.height) * slot.scale;
+    const dw = img.width * s, dh = img.height * s;
+    return { x: rx + (rw - dw) * slot.ox, y: ry + (rh - dh) * slot.oy, w: dw, h: dh };
+  }
+
+  function drawPhoto(ctx, k, slot, rx, ry, rw, rh, placeholder) {
+    const D = makeDraw(ctx, k);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(D.P(rx), D.P(ry), D.P(rw), D.P(rh));
+    ctx.clip();
+    if (slot.img) {
+      const r = coverRect(slot, rx, ry, rw, rh);
+      ctx.drawImage(slot.img, D.P(r.x), D.P(r.y), D.P(r.w), D.P(r.h));
+    } else {
+      const g = ctx.createLinearGradient(0, D.P(ry), 0, D.P(ry + rh));
+      g.addColorStop(0, '#dcb284'); g.addColorStop(1, '#c1925f');
+      ctx.fillStyle = g;
+      ctx.fillRect(D.P(rx), D.P(ry), D.P(rw), D.P(rh));
+      ctx.fillStyle = 'rgba(30,34,47,.45)';
+      ctx.font = `600 ${D.P(15)}px ${FONT}`;
+      ctx.textAlign = 'center';
+      ctx.fillText(placeholder, D.P(rx + rw / 2), D.P(ry + rh / 2));
+    }
+    ctx.restore();
+  }
+
+  /* ──────────────── template pieces (exact .ai geometry) ──────────────── */
+
+  // white ring border: page edge → inner rounded rect (11.65,11.37)-(677.54,947.37) r15
+  function drawRing(ctx, k) {
+    const D = makeDraw(ctx, k);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, D.P(PW), D.P(PH));
+    D.rrPath(11.65, 11.37, 677.54 - 11.65, 947.37 - 11.37, 15, true);
+    ctx.fillStyle = WHITE;
+    ctx.fill('evenodd');
+    ctx.restore();
+  }
+
+  // logo at (28.67, 32.67), 152.33 × 92.33 pt
+  function drawLogo(ctx, k) {
+    const D = makeDraw(ctx, k);
+    let img;
+    if (S.logoImg) img = S.logoImg;
+    else {
+      const style = S.logoStyle === 'auto' ? 'light' : S.logoStyle;
+      img = style === 'light' ? logoLight : logoDark;
+    }
+    if (!img.complete || !img.naturalWidth) return;
+    if (S.logoImg) {
+      const box = { x: 28.67, y: 32.67, w: 152.33, h: 92.33 };
+      const s = Math.min(box.w / img.naturalWidth, box.h / img.naturalHeight);
+      ctx.drawImage(img, D.P(box.x), D.P(box.y), D.P(img.naturalWidth * s), D.P(img.naturalHeight * s));
+    } else {
+      ctx.drawImage(img, D.P(28.67), D.P(32.67), D.P(152.33), D.P(92.33));
+    }
+  }
+
+  // badge: x 31.74→177.83 · top section y 146.08→178.59 · strip y 178.59→199.30 · white 50%
+  function drawBadge(ctx, k) {
+    if (!S.fabric && !S.comp) return;
+    const D = makeDraw(ctx, k);
+    let x0 = 31.74, x1 = 177.83;
+    const cx = (x0 + x1) / 2;
+    // widen symmetrically if the fabric name is longer than the template box
+    const needed = Math.max(D.measure(S.fabric, 25.35, 600), D.measure(S.comp, 12.38, 600)) + 22;
+    if (needed > x1 - x0) { x0 = cx - needed / 2; x1 = cx + needed / 2; }
+
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = WHITE;
+    D.rrPath(x0, 146.08, x1 - x0, 178.59 - 146.08, [10, 10, 0, 0]);
+    ctx.fill();
+    D.rrPath(x0, 178.59, x1 - x0, 199.30 - 178.59, [0, 0, 10, 10]);
+    ctx.fill();
+    ctx.restore();
+
+    if (S.fabric) D.text(S.fabric, cx, 170.83, 25.35, 600, INK);
+    if (S.comp) D.text(S.comp, cx, 193.35, 12.38, 600, INK);
+  }
+
+  // MODEL/CODE block — base positions from the .ai; variant A shifts it
+  function drawModelCode(ctx, k) {
+    if (!S.model && !S.code) return;
+    const D = makeDraw(ctx, k);
+    // centered on the same axis as the badge and size panel (x = 104.78)
+    const dx = 104.78 - 64.77;
+    const dy = 240.97;
+    const cx = 64.77 + dx;
+    const col = S.mcStyle === 'light' ? WHITE : INK;
+
+    ctx.fillStyle = col;
+    if (S.model) {
+      // ┌ ┐ corner brackets (exact bar dimensions from the file)
+      D.rect(32.41 + dx, 229.51 + dy, 1.76, 11.46);   // TL vertical
+      D.rect(32.41 + dx, 229.51 + dy, 10.51, 1.46);   // TL horizontal
+      D.rect(95.38 + dx, 229.52 + dy, 1.76, 11.46);   // TR vertical
+      D.rect(86.63 + dx, 229.52 + dy, 10.51, 1.46);   // TR horizontal
+      // └───┘ bottom bar with risers
+      D.rect(32.41 + dx, 262.36 + dy, 1.76, 10.55);
+      D.rect(95.38 + dx, 262.36 + dy, 1.76, 10.55);
+      D.rect(32.41 + dx, 271.60 + dy, 64.73, 1.31);
+
+      D.text('MODEL', cx, 234.83 + dy, 12.93, 600, col);
+      D.text(S.model, cx, 261.17 + dy, 25.35, 600, col);
+    }
+    if (S.code) {
+      D.text('CODE', cx, 288.86 + dy, 12.93, 600, col);
+      D.text(S.code, cx, 313.52 + dy, 25.35, 600, col);
+    }
+  }
+
+  // size panel: x 55.71→153.86, bottom anchored at 897.31, white 60%
+  function drawSizes(ctx, k) {
+    const list = S.sizes.split(/[,;\s]+/).filter(Boolean);
+    if (!list.length) return;
+    const D = makeDraw(ctx, k);
+    const n = list.length;
+    const STRIDE = 47.256, BOXH = 36.832, PADT = 21.2, PADB = 16.24;
+    const panelH = PADT + BOXH + (n - 1) * STRIDE + PADB;
+    const py = 897.31 - panelH;
+
+    ctx.save();
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = WHITE;
+    D.rrPath(55.71, py, 153.86 - 55.71, panelH, 10);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.strokeStyle = BLACK;
+    ctx.lineWidth = D.P(1);
+    list.forEach((sz, i) => {
+      const ty = py + PADT + 9.854 + i * STRIDE; // anchor like the .ai path origin
+      const xR = 122.40, xL = 74.75;
+      const top = ty - 9.854, bot = ty + 26.978;
+      // box outline with the gap on the right edge (between ty and ty+16.962)
+      ctx.beginPath();
+      ctx.moveTo(D.P(xR), D.P(ty));
+      ctx.lineTo(D.P(xR), D.P(top));
+      ctx.lineTo(D.P(xL), D.P(top));
+      ctx.lineTo(D.P(xL), D.P(bot));
+      ctx.lineTo(D.P(xR), D.P(bot));
+      ctx.lineTo(D.P(xR), D.P(ty + 16.962));
+      ctx.stroke();
+      D.text(sz, 134.85, ty + 15.73, 20.39, 600, BLACK);
+    });
+  }
+
+  // magnifier circle (variant A): template default center (577.5, 824) r 70.3
+  function drawZoom(ctx, k) {
+    if (!S.showZoom) return;
+    const D = makeDraw(ctx, k);
+    const cx = S.zoomCx, cy = S.zoomCy, r = S.zoomR;
+    const sx = S.spotX * PW, sy = S.spotY * PH;
+
+    const dxx = cx - sx, dyy = cy - sy;
+    const dist = Math.hypot(dxx, dyy);
+    if (dist > r + 5) {
+      const beta = Math.acos(r / dist);
+      const base = Math.atan2(sy - cy, sx - cx);
+      ctx.strokeStyle = 'rgba(255,255,255,.95)';
+      ctx.lineWidth = D.P(1.6);
+      for (const sgn of [-1, 1]) {
+        const a = base + sgn * beta;
+        ctx.beginPath();
+        ctx.moveTo(D.P(sx), D.P(sy));
+        ctx.lineTo(D.P(cx + r * Math.cos(a)), D.P(cy + r * Math.sin(a)));
+        ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(255,255,255,.95)';
+      ctx.beginPath();
+      ctx.arc(D.P(sx), D.P(sy), D.P(2.3), 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(D.P(cx), D.P(cy), D.P(r), 0, Math.PI * 2);
+    ctx.clip();
+    if (S.fabricSlot.img) {
+      const fr = coverRect(S.fabricSlot, cx - r, cy - r, 2 * r, 2 * r);
+      ctx.drawImage(S.fabricSlot.img, D.P(fr.x), D.P(fr.y), D.P(fr.w), D.P(fr.h));
+    } else if (S.photoA.img) {
+      const pr = coverRect(S.photoA, 0, 0, PW, PH), m = S.zoomMag;
+      ctx.translate(D.P(cx), D.P(cy));
+      ctx.scale(m, m);
+      ctx.translate(-D.P(sx), -D.P(sy));
+      ctx.drawImage(S.photoA.img, D.P(pr.x), D.P(pr.y), D.P(pr.w), D.P(pr.h));
+    } else {
+      ctx.fillStyle = '#c89b6f';
+      ctx.fillRect(D.P(cx - r), D.P(cy - r), D.P(2 * r), D.P(2 * r));
+    }
+    ctx.restore();
+
+    ctx.strokeStyle = WHITE;
+    ctx.lineWidth = D.P(2.8);
+    ctx.beginPath();
+    ctx.arc(D.P(cx), D.P(cy), D.P(r), 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  function renderTo(ctx, k) {
+    ctx.clearRect(0, 0, PW * k, PH * k);
+    drawPhoto(ctx, k, S.photoA, 0, 0, PW, PH, 'Upload a model photo');
+    if (S.frame) drawRing(ctx, k);
+    drawZoom(ctx, k);
+    drawLogo(ctx, k);
+    drawBadge(ctx, k);
+    drawModelCode(ctx, k);
+    drawSizes(ctx, k);
+  }
+
+  const mainCtx = cv.getContext('2d');
+  function render() { renderTo(mainCtx, K); }
+
+  /* ──────────────── wiring ──────────────── */
+  ['fabric', 'comp', 'model', 'code', 'sizes'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => { S[id] = el.value; render(); });
+  });
+
+  document.getElementById('scaleA').addEventListener('input', e => { S.photoA.scale = e.target.value / 100; render(); });
+  document.getElementById('frame').addEventListener('change', e => { S.frame = e.target.checked; render(); });
+  document.getElementById('zoomMag').addEventListener('input', e => { S.zoomMag = e.target.value / 100; render(); });
+  document.getElementById('zoomR').addEventListener('input', e => { S.zoomR = +e.target.value; render(); });
+  document.getElementById('fabScale').addEventListener('input', e => { S.fabricSlot.scale = e.target.value / 100; render(); });
+  document.getElementById('showZoom').addEventListener('change', e => { S.showZoom = e.target.checked; render(); });
+  document.getElementById('logoStyle').addEventListener('change', e => { S.logoStyle = e.target.value; render(); });
+  document.getElementById('mcStyle').addEventListener('change', e => { S.mcStyle = e.target.value; render(); });
+
+  function hookDrop(dropId, fileId, assign) {
+    const drop = document.getElementById(dropId);
+    const file = document.getElementById(fileId);
+    drop.addEventListener('click', () => file.click());
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', e => {
+      e.preventDefault(); drop.classList.remove('over');
+      if (e.dataTransfer.files[0]) load(e.dataTransfer.files[0]);
+    });
+    file.addEventListener('change', () => { if (file.files[0]) load(file.files[0]); });
+    function load(f) {
+      const img = new Image();
+      img.onload = () => {
+        assign(img);
+        drop.classList.add('loaded');
+        drop.querySelector('em').textContent = f.name + ' ✓ (click to replace)';
+        render();
+      };
+      img.src = URL.createObjectURL(f);
+    }
+  }
+  hookDrop('dropA', 'fileA', img => S.photoA.img = img);
+  hookDrop('dropF', 'fileF', img => S.fabricSlot.img = img);
+  hookDrop('dropL', 'fileL', img => S.logoImg = img);
+
+  // pick the magnifier spot
+  const pickBtn = document.getElementById('pickSpot');
+  const banner = document.getElementById('pickBanner');
+  pickBtn.addEventListener('click', () => {
+    S.picking = !S.picking;
+    pickBtn.classList.toggle('on', S.picking);
+    banner.classList.toggle('show', S.picking);
+    cv.classList.toggle('pick', S.picking);
+    cv.classList.toggle('pan', !S.picking);
+  });
+  cv.addEventListener('click', e => {
+    if (!S.picking) return;
+    const b = cv.getBoundingClientRect();
+    S.spotX = (e.clientX - b.left) / b.width;
+    S.spotY = (e.clientY - b.top) / b.height;
+    S.picking = false;
+    pickBtn.classList.remove('on');
+    banner.classList.remove('show');
+    cv.classList.remove('pick');
+    cv.classList.add('pan');
+    render();
+  });
+
+  // drag: the zoom circle, the picture inside it (Shift), or a photo
+  let dragging = null, lastX = 0, lastY = 0;
+  const overCircle = (xPt, yPt) =>
+    S.showZoom && Math.hypot(xPt - S.zoomCx, yPt - S.zoomCy) <= S.zoomR;
+
+  cv.addEventListener('pointerdown', e => {
+    if (S.picking) return;
+    const b = cv.getBoundingClientRect();
+    const xPt = (e.clientX - b.left) / b.width * PW;
+    const yPt = (e.clientY - b.top) / b.height * PH;
+
+    if (overCircle(xPt, yPt)) {
+      if (e.shiftKey && S.fabricSlot.img) dragging = { type: 'fabric' };
+      else dragging = { type: 'circle' };
+      lastX = e.clientX; lastY = e.clientY;
+      cv.setPointerCapture(e.pointerId);
+      return;
+    }
+
+    const slot = S.photoA, rw = PW;
+    if (!slot.img) return;
+    dragging = { type: 'photo', slot, rw };
+    lastX = e.clientX; lastY = e.clientY;
+    cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const b = cv.getBoundingClientRect();
+    const toPt = PW / b.width;
+    const dx = (e.clientX - lastX) * toPt, dy = (e.clientY - lastY) * toPt;
+    lastX = e.clientX; lastY = e.clientY;
+
+    if (dragging.type === 'circle') {
+      S.zoomCx = Math.min(PW - 20, Math.max(20, S.zoomCx + dx));
+      S.zoomCy = Math.min(PH - 20, Math.max(20, S.zoomCy + dy));
+    } else if (dragging.type === 'fabric') {
+      const slot = S.fabricSlot, side = 2 * S.zoomR;
+      const fr = coverRect(slot, 0, 0, side, side);
+      if (fr.w > side) slot.ox = Math.min(1, Math.max(0, slot.ox + dx / (fr.w - side)));
+      if (fr.h > side) slot.oy = Math.min(1, Math.max(0, slot.oy + dy / (fr.h - side)));
+    } else {
+      const { slot, rw } = dragging;
+      const r = coverRect(slot, 0, 0, rw, PH);
+      if (r.w > rw) slot.ox = Math.min(1, Math.max(0, slot.ox + dx / (r.w - rw)));
+      if (r.h > PH) slot.oy = Math.min(1, Math.max(0, slot.oy + dy / (r.h - PH)));
+    }
+    render();
+  });
+  cv.addEventListener('pointerup', () => dragging = null);
+  cv.addEventListener('pointercancel', () => dragging = null);
+
+  // scroll over the circle: zoom the picture inside (or the magnification)
+  cv.addEventListener('wheel', e => {
+    const b = cv.getBoundingClientRect();
+    const xPt = (e.clientX - b.left) / b.width * PW;
+    const yPt = (e.clientY - b.top) / b.height * PH;
+    if (!overCircle(xPt, yPt)) return;
+    e.preventDefault();
+    const f = e.deltaY < 0 ? 1.07 : 1 / 1.07;
+    if (S.fabricSlot.img) {
+      S.fabricSlot.scale = Math.min(3.5, Math.max(1, S.fabricSlot.scale * f));
+      document.getElementById('fabScale').value = Math.round(S.fabricSlot.scale * 100);
+    } else {
+      S.zoomMag = Math.min(4.5, Math.max(1.5, S.zoomMag * f));
+      document.getElementById('zoomMag').value = Math.round(S.zoomMag * 100);
+    }
+    render();
+  }, { passive: false });
+
+  // download (optionally at 2x)
+  document.getElementById('download').addEventListener('click', () => {
+    const hi = document.getElementById('hires').checked;
+    let url;
+    if (hi) {
+      const off = document.createElement('canvas');
+      off.width = W * 2; off.height = H * 2;
+      renderTo(off.getContext('2d'), K * 2);
+      url = off.toDataURL('image/png');
+    } else {
+      url = cv.toDataURL('image/png');
+    }
+    const a = document.createElement('a');
+    const name = [S.model, S.code].filter(Boolean).join('_').replace(/\s+/g, '') || 'catalog-card';
+    a.download = name + '.png';
+    a.href = url;
+    a.click();
+  });
+
+  document.fonts.load(`600 54px ${FONT}`).then(render);
+  render();
+
+  window.__studio = { S, render };
+})();
+</script>
+</body>
+</html>
