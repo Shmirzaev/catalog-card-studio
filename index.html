@@ -267,6 +267,7 @@
     showZoom: true, zoomMag: 2.6,
     zoomCx: 577.5, zoomCy: 824, zoomR: 70.3,
     spotX: .655, spotY: .735,
+    modelCodeDx: 0, modelCodeDy: 0,
     picking: false
   };
 
@@ -394,13 +395,43 @@
   }
 
   // MODEL/CODE block — base positions from the .ai; variant A shifts it
+  function modelCodePosition() {
+    const dx = 104.78 - 64.77 + S.modelCodeDx;
+    const dy = 240.97 + S.modelCodeDy;
+    return { dx, dy, cx: 64.77 + dx };
+  }
+
+  function modelCodeBounds(ctx, k, pad = 11) {
+    if (!S.model && !S.code) return null;
+    const D = makeDraw(ctx, k);
+    const { dx, dy, cx } = modelCodePosition();
+    let left = 32.41 + dx;
+    let right = 97.14 + dx;
+
+    [
+      ['MODEL', 12.93, 600],
+      [S.model, 25.35, 600],
+      ['CODE', 12.93, 600],
+      [S.code, 25.35, 600]
+    ].forEach(([str, size, weight]) => {
+      if (!str) return;
+      const half = D.measure(str, size, weight) / 2;
+      left = Math.min(left, cx - half);
+      right = Math.max(right, cx + half);
+    });
+
+    return {
+      x: left - pad,
+      y: (S.model ? 229.51 : 276.5) + dy - pad,
+      w: right - left + pad * 2,
+      h: (S.code ? 321 : 274) + dy - ((S.model ? 229.51 : 276.5) + dy) + pad * 2
+    };
+  }
+
   function drawModelCode(ctx, k) {
     if (!S.model && !S.code) return;
     const D = makeDraw(ctx, k);
-    // centered on the same axis as the badge and size panel (x = 104.78)
-    const dx = 104.78 - 64.77;
-    const dy = 240.97;
-    const cx = 64.77 + dx;
+    const { dx, dy, cx } = modelCodePosition();
     const col = S.mcStyle === 'light' ? WHITE : INK;
 
     ctx.fillStyle = col;
@@ -591,16 +622,42 @@
     render();
   });
 
-  // drag: the zoom circle, the picture inside it (Shift), or a photo
+  // drag: the model/code block, the zoom circle, the picture inside it (Shift), or a photo
   let dragging = null, lastX = 0, lastY = 0;
   const overCircle = (xPt, yPt) =>
     S.showZoom && Math.hypot(xPt - S.zoomCx, yPt - S.zoomCy) <= S.zoomR;
+  const overModelCode = (xPt, yPt) => {
+    const b = modelCodeBounds(mainCtx, K);
+    return b && xPt >= b.x && xPt <= b.x + b.w && yPt >= b.y && yPt <= b.y + b.h;
+  };
+
+  function moveModelCode(dx, dy) {
+    const b = modelCodeBounds(mainCtx, K, 0);
+    if (!b) return;
+
+    const margin = 6;
+    let mx = dx, my = dy;
+    if (b.x + mx < margin) mx = margin - b.x;
+    if (b.x + b.w + mx > PW - margin) mx = PW - margin - b.x - b.w;
+    if (b.y + my < margin) my = margin - b.y;
+    if (b.y + b.h + my > PH - margin) my = PH - margin - b.y - b.h;
+
+    S.modelCodeDx += mx;
+    S.modelCodeDy += my;
+  }
 
   cv.addEventListener('pointerdown', e => {
     if (S.picking) return;
     const b = cv.getBoundingClientRect();
     const xPt = (e.clientX - b.left) / b.width * PW;
     const yPt = (e.clientY - b.top) / b.height * PH;
+
+    if (overModelCode(xPt, yPt)) {
+      dragging = { type: 'modelCode' };
+      lastX = e.clientX; lastY = e.clientY;
+      cv.setPointerCapture(e.pointerId);
+      return;
+    }
 
     if (overCircle(xPt, yPt)) {
       if (e.shiftKey && S.fabricSlot.img) dragging = { type: 'fabric' };
@@ -623,7 +680,9 @@
     const dx = (e.clientX - lastX) * toPt, dy = (e.clientY - lastY) * toPt;
     lastX = e.clientX; lastY = e.clientY;
 
-    if (dragging.type === 'circle') {
+    if (dragging.type === 'modelCode') {
+      moveModelCode(dx, dy);
+    } else if (dragging.type === 'circle') {
       S.zoomCx = Math.min(PW - 20, Math.max(20, S.zoomCx + dx));
       S.zoomCy = Math.min(PH - 20, Math.max(20, S.zoomCy + dy));
     } else if (dragging.type === 'fabric') {
