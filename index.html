@@ -194,7 +194,7 @@
 
   <fieldset>
     <legend>Sizes</legend>
-    <label class="fld"><span>Comma separated</span><input type="text" id="sizes" value="50, 52, 54, 56, 58, 60"></label>
+    <label class="fld"><span>Comma separated</span><input type="text" id="sizes" value="50, 52, 54, 56, 58, 60, Free Size"></label>
   </fieldset>
 
   <fieldset id="zoomGroup">
@@ -263,7 +263,7 @@
     logoImg: null, logoStyle: 'auto', logoScale: 1, logoX: 28.67, logoY: 32.67, mcStyle: 'dark',
     fabric: 'Suprem', comp: '100% COTTON',
     model: 'XJ-3062', code: 'V-4580',
-    sizes: '50, 52, 54, 56, 58, 60',
+    sizes: '50, 52, 54, 56, 58, 60, Free Size',
     frame: true,
     showZoom: true, zoomMag: 2.6,
     zoomCx: 577.5, zoomCy: 824, zoomR: 70.3,
@@ -478,7 +478,34 @@
 
   // size panel: x 55.71→153.86, bottom anchored at 897.31, white 60%
   function sizeList() {
-    return S.sizes.split(/[,;\s]+/).filter(Boolean);
+    const separators = /[,;]/;
+    if (separators.test(S.sizes)) {
+      return S.sizes.split(separators).map(size => size.trim()).filter(Boolean);
+    }
+    return S.sizes.split(/\s+/).filter(Boolean);
+  }
+
+  function drawSizeLabel(D, label, x, y, maxW) {
+    const size = 20.39, weight = 600;
+    if (D.measure(label, size, weight) <= maxW) {
+      D.text(label, x, y, size, weight, BLACK);
+      return;
+    }
+
+    const words = label.split(/\s+/).filter(Boolean);
+    if (words.length > 1) {
+      const small = 13.2;
+      const lines = [words[0], words.slice(1).join(' ')];
+      if (lines.every(line => D.measure(line, small, weight) <= maxW)) {
+        D.text(lines[0], x, y - 6.6, small, weight, BLACK);
+        D.text(lines[1], x, y + 8.5, small, weight, BLACK);
+        return;
+      }
+    }
+
+    let fit = size;
+    while (fit > 10 && D.measure(label, fit, weight) > maxW) fit -= 0.5;
+    D.text(label, x, y, fit, weight, BLACK);
   }
 
   function sizeLayout() {
@@ -536,7 +563,7 @@
       ctx.lineTo(D.P(xR), D.P(bot));
       ctx.lineTo(D.P(xR), D.P(ty + 16.962));
       ctx.stroke();
-      D.text(sz, 134.85 + S.sizesDx, ty + 15.73, 20.39, 600, BLACK);
+      drawSizeLabel(D, sz, 134.85 + S.sizesDx, ty + 15.73, 42);
     });
   }
 
