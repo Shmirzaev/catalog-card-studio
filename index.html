@@ -194,7 +194,7 @@
 
   <fieldset>
     <legend>Sizes</legend>
-    <label class="fld"><span>Comma separated</span><input type="text" id="sizes" value="50, 52, 54, 56, 58, 60, Free Size"></label>
+    <label class="fld"><span>Comma separated</span><input type="text" id="sizes" value="Free Size"></label>
   </fieldset>
 
   <fieldset id="zoomGroup">
@@ -263,7 +263,7 @@
     logoImg: null, logoStyle: 'auto', logoScale: 1, logoX: 28.67, logoY: 32.67, mcStyle: 'dark',
     fabric: 'Suprem', comp: '100% COTTON',
     model: 'XJ-3062', code: 'V-4580',
-    sizes: '50, 52, 54, 56, 58, 60, Free Size',
+    sizes: 'Free Size',
     frame: true,
     showZoom: true, zoomMag: 2.6,
     zoomCx: 577.5, zoomCy: 824, zoomR: 70.3,
@@ -477,12 +477,31 @@
   }
 
   // size panel: x 55.71→153.86, bottom anchored at 897.31, white 60%
+  function isFreeSizeLabel(size) {
+    return /^free\s*size$/i.test(size.trim());
+  }
+
   function sizeList() {
+    const raw = S.sizes.trim();
+    if (!raw) return [];
+    if (isFreeSizeLabel(raw)) return [raw];
+
     const separators = /[,;]/;
-    if (separators.test(S.sizes)) {
-      return S.sizes.split(separators).map(size => size.trim()).filter(Boolean);
+    if (separators.test(raw)) {
+      return raw.split(separators).map(size => size.trim()).filter(Boolean);
     }
-    return S.sizes.split(/\s+/).filter(Boolean);
+
+    const tokens = raw.split(/\s+/).filter(Boolean);
+    const list = [];
+    for (let i = 0; i < tokens.length; i++) {
+      if (/^free$/i.test(tokens[i]) && /^size$/i.test(tokens[i + 1] || '')) {
+        list.push(`${tokens[i]} ${tokens[i + 1]}`);
+        i++;
+      } else {
+        list.push(tokens[i]);
+      }
+    }
+    return list;
   }
 
   function drawSizeLabel(D, label, x, y, maxW) {
@@ -511,9 +530,22 @@
   function sizeLayout() {
     const list = sizeList();
     if (!list.length) return null;
+    if (list.length === 1 && isFreeSizeLabel(list[0])) {
+      return {
+        type: 'freeSize',
+        label: 'Free size',
+        x: 28.5 + S.sizesDx,
+        y: 878.5 + S.sizesDy,
+        w: 124,
+        h: 34,
+        r: 13.5
+      };
+    }
+
     const STRIDE = 47.256, BOXH = 36.832, PADT = 21.2, PADB = 16.24;
     const panelH = PADT + BOXH + (list.length - 1) * STRIDE + PADB;
     return {
+      type: 'numbered',
       list,
       stride: STRIDE,
       boxH: BOXH,
@@ -540,6 +572,17 @@
     const layout = sizeLayout();
     if (!layout) return;
     const D = makeDraw(ctx, k);
+
+    if (layout.type === 'freeSize') {
+      ctx.save();
+      ctx.globalAlpha = 0.72;
+      ctx.fillStyle = WHITE;
+      D.rrPath(layout.x, layout.y, layout.w, layout.h, layout.r);
+      ctx.fill();
+      ctx.restore();
+      D.text(layout.label, layout.x + layout.w / 2, layout.y + 24.8, 22.2, 600, BLACK);
+      return;
+    }
 
     ctx.save();
     ctx.globalAlpha = 0.6;
