@@ -261,6 +261,7 @@
     photoA: { img: null, scale: 1, ox: .5, oy: .42 },
     fabricSlot: { img: null, scale: 1, ox: .5, oy: .5 },
     logoImg: null, logoStyle: 'auto', logoScale: 1, logoX: 28.67, logoY: 32.67, mcStyle: 'dark',
+    badgeDx: 0, badgeDy: 0,
     fabric: 'Suprem', comp: '100% COTTON',
     model: 'XJ-3062', code: 'V-4580',
     sizes: 'Free Size',
@@ -393,26 +394,45 @@
   }
 
   // badge: x 31.74→177.83 · top section y 146.08→178.59 · strip y 178.59→199.30 · white 50%
-  function drawBadge(ctx, k) {
-    if (!S.fabric && !S.comp) return;
-    const D = makeDraw(ctx, k);
+  function badgeLayout(D) {
+    if (!S.fabric && !S.comp) return null;
     let x0 = 31.74, x1 = 177.83;
     const cx = (x0 + x1) / 2;
     // widen symmetrically if the fabric name is longer than the template box
     const needed = Math.max(D.measure(S.fabric, 25.35, 600), D.measure(S.comp, 12.38, 600)) + 22;
     if (needed > x1 - x0) { x0 = cx - needed / 2; x1 = cx + needed / 2; }
+    return {
+      x: x0 + S.badgeDx,
+      y: 146.08 + S.badgeDy,
+      w: x1 - x0,
+      h: 199.30 - 146.08,
+      cx: cx + S.badgeDx
+    };
+  }
+
+  function badgeBounds(pad = 6) {
+    const D = makeDraw(mainCtx, K);
+    const b = badgeLayout(D);
+    if (!b) return null;
+    return { x: b.x - pad, y: b.y - pad, w: b.w + pad * 2, h: b.h + pad * 2 };
+  }
+
+  function drawBadge(ctx, k) {
+    const D = makeDraw(ctx, k);
+    const b = badgeLayout(D);
+    if (!b) return;
 
     ctx.save();
     ctx.globalAlpha = 0.5;
     ctx.fillStyle = WHITE;
-    D.rrPath(x0, 146.08, x1 - x0, 178.59 - 146.08, [10, 10, 0, 0]);
+    D.rrPath(b.x, b.y, b.w, 178.59 - 146.08, [10, 10, 0, 0]);
     ctx.fill();
-    D.rrPath(x0, 178.59, x1 - x0, 199.30 - 178.59, [0, 0, 10, 10]);
+    D.rrPath(b.x, 178.59 + S.badgeDy, b.w, 199.30 - 178.59, [0, 0, 10, 10]);
     ctx.fill();
     ctx.restore();
 
-    if (S.fabric) D.text(S.fabric, cx, 170.83, 25.35, 600, INK);
-    if (S.comp) D.text(S.comp, cx, 193.35, 12.38, 600, INK);
+    if (S.fabric) D.text(S.fabric, b.cx, 170.83 + S.badgeDy, 25.35, 600, INK);
+    if (S.comp) D.text(S.comp, b.cx, 193.35 + S.badgeDy, 12.38, 600, INK);
   }
 
   // MODEL/CODE block — base positions from the .ai; variant A shifts it
@@ -742,13 +762,14 @@
     render();
   });
 
-  // drag: the model/code block, the zoom circle, the picture inside it (Shift), or a photo
+  // drag: the badge, model/code block, zoom circle, picture inside it (Shift), or a photo
   let dragging = null, lastX = 0, lastY = 0;
   const overCircle = (xPt, yPt) =>
     S.showZoom && Math.hypot(xPt - S.zoomCx, yPt - S.zoomCy) <= S.zoomR;
   const insideBox = (box, xPt, yPt) =>
     box && xPt >= box.x && xPt <= box.x + box.w && yPt >= box.y && yPt <= box.y + box.h;
   const overLogo = (xPt, yPt) => insideBox(logoBounds(), xPt, yPt);
+  const overBadge = (xPt, yPt) => insideBox(badgeBounds(), xPt, yPt);
   const overSizes = (xPt, yPt) => insideBox(sizesBounds(), xPt, yPt);
   const overModelCode = (xPt, yPt) => {
     const b = modelCodeBounds(mainCtx, K);
@@ -774,6 +795,13 @@
     if (!move) return;
     S.logoX += move.x;
     S.logoY += move.y;
+  }
+
+  function moveBadge(dx, dy) {
+    const move = clampedMove(badgeBounds(0), dx, dy);
+    if (!move) return;
+    S.badgeDx += move.x;
+    S.badgeDy += move.y;
   }
 
   function moveSizes(dx, dy) {
@@ -810,6 +838,13 @@
       return;
     }
 
+    if (overBadge(xPt, yPt)) {
+      dragging = { type: 'badge' };
+      lastX = e.clientX; lastY = e.clientY;
+      cv.setPointerCapture(e.pointerId);
+      return;
+    }
+
     if (overLogo(xPt, yPt)) {
       dragging = { type: 'logo' };
       lastX = e.clientX; lastY = e.clientY;
@@ -840,6 +875,8 @@
 
     if (dragging.type === 'logo') {
       moveLogo(dx, dy);
+    } else if (dragging.type === 'badge') {
+      moveBadge(dx, dy);
     } else if (dragging.type === 'sizes') {
       moveSizes(dx, dy);
     } else if (dragging.type === 'modelCode') {
