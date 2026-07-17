@@ -180,6 +180,15 @@
   </fieldset>
 
   <fieldset>
+    <legend>Fabric badge 2</legend>
+    <div class="row2">
+      <label class="fld"><span>Fabric name</span><input type="text" id="fabric2" value=""></label>
+      <label class="fld"><span>Composition</span><input type="text" id="comp2" value=""></label>
+    </div>
+    <div class="checkrow"><input type="checkbox" id="equalBadgeText2"><label for="equalBadgeText2">Equal text size</label></div>
+  </fieldset>
+
+  <fieldset>
     <legend>Model &amp; Code</legend>
     <div class="row2">
       <label class="fld"><span>Model</span><input type="text" id="model" value="XJ-3062"></label>
@@ -264,6 +273,8 @@
     logoImg: null, logoStyle: 'auto', logoScale: 1, logoX: 28.67, logoY: 32.67, mcStyle: 'dark',
     badgeDx: 0, badgeDy: 0,
     fabric: 'Suprem', comp: '100% COTTON', equalBadgeText: false,
+    badge2Dx: 0, badge2Dy: 0,
+    fabric2: '', comp2: '', equalBadgeText2: false,
     model: 'XJ-3062', code: 'V-4580',
     sizes: 'Free Size',
     frame: true,
@@ -395,69 +406,93 @@
   }
 
   // badge: x 31.74→177.83 · top section y 146.08→178.59 · strip y 178.59→199.30 · white 50%
-  function badgeTextStyle() {
-    if (S.equalBadgeText) {
+  function badgeTextStyle(equalText) {
+    if (equalText) {
       return {
         fabricSize: 18.6,
         compSize: 18.6,
-        fabricY: 169.36,
-        compY: 194.18,
+        fabricOffset: 23.28,
+        compOffset: 48.10,
         weight: 600
       };
     }
     return {
       fabricSize: 25.35,
       compSize: 12.38,
-      fabricY: 170.83,
-      compY: 193.35,
+      fabricOffset: 24.75,
+      compOffset: 47.27,
       weight: 600
     };
   }
 
-  function badgeLayout(D) {
-    if (!S.fabric && !S.comp) return null;
-    const style = badgeTextStyle();
+  function badgeData(which) {
+    if (which === 'badge2') {
+      return {
+        fabric: S.fabric2,
+        comp: S.comp2,
+        equalText: S.equalBadgeText2,
+        dx: S.badge2Dx,
+        dy: S.badge2Dy,
+        baseY: 204.0
+      };
+    }
+    return {
+      fabric: S.fabric,
+      comp: S.comp,
+      equalText: S.equalBadgeText,
+      dx: S.badgeDx,
+      dy: S.badgeDy,
+      baseY: 146.08
+    };
+  }
+
+  function badgeLayout(D, which = 'badge') {
+    const data = badgeData(which);
+    if (!data.fabric && !data.comp) return null;
+    const style = badgeTextStyle(data.equalText);
     let x0 = 31.74, x1 = 177.83;
     const cx = (x0 + x1) / 2;
     // widen symmetrically if the fabric name is longer than the template box
     const needed = Math.max(
-      D.measure(S.fabric, style.fabricSize, style.weight),
-      D.measure(S.comp, style.compSize, style.weight)
+      D.measure(data.fabric, style.fabricSize, style.weight),
+      D.measure(data.comp, style.compSize, style.weight)
     ) + 22;
     if (needed > x1 - x0) { x0 = cx - needed / 2; x1 = cx + needed / 2; }
     return {
-      x: x0 + S.badgeDx,
-      y: 146.08 + S.badgeDy,
+      data,
+      style,
+      x: x0 + data.dx,
+      y: data.baseY + data.dy,
       w: x1 - x0,
       h: 199.30 - 146.08,
-      cx: cx + S.badgeDx
+      cx: cx + data.dx
     };
   }
 
-  function badgeBounds(pad = 6) {
+  function badgeBounds(which = 'badge', pad = 6) {
     const D = makeDraw(mainCtx, K);
-    const b = badgeLayout(D);
+    const b = badgeLayout(D, which);
     if (!b) return null;
     return { x: b.x - pad, y: b.y - pad, w: b.w + pad * 2, h: b.h + pad * 2 };
   }
 
-  function drawBadge(ctx, k) {
+  function drawBadge(ctx, k, which = 'badge') {
     const D = makeDraw(ctx, k);
-    const b = badgeLayout(D);
+    const b = badgeLayout(D, which);
     if (!b) return;
-    const style = badgeTextStyle();
+    const { data, style } = b;
 
     ctx.save();
     ctx.globalAlpha = 0.5;
     ctx.fillStyle = WHITE;
     D.rrPath(b.x, b.y, b.w, 178.59 - 146.08, [10, 10, 0, 0]);
     ctx.fill();
-    D.rrPath(b.x, 178.59 + S.badgeDy, b.w, 199.30 - 178.59, [0, 0, 10, 10]);
+    D.rrPath(b.x, data.baseY + 32.51 + data.dy, b.w, 199.30 - 178.59, [0, 0, 10, 10]);
     ctx.fill();
     ctx.restore();
 
-    if (S.fabric) D.text(S.fabric, b.cx, style.fabricY + S.badgeDy, style.fabricSize, style.weight, INK);
-    if (S.comp) D.text(S.comp, b.cx, style.compY + S.badgeDy, style.compSize, style.weight, INK);
+    if (data.fabric) D.text(data.fabric, b.cx, data.baseY + style.fabricOffset + data.dy, style.fabricSize, style.weight, INK);
+    if (data.comp) D.text(data.comp, b.cx, data.baseY + style.compOffset + data.dy, style.compSize, style.weight, INK);
   }
 
   // MODEL/CODE block — base positions from the .ai; variant A shifts it
@@ -715,6 +750,7 @@
     drawZoom(ctx, k);
     drawLogo(ctx, k);
     drawBadge(ctx, k);
+    drawBadge(ctx, k, 'badge2');
     drawModelCode(ctx, k);
     drawSizes(ctx, k);
   }
@@ -723,7 +759,7 @@
   function render() { renderTo(mainCtx, K); }
 
   /* ──────────────── wiring ──────────────── */
-  ['fabric', 'comp', 'model', 'code', 'sizes'].forEach(id => {
+  ['fabric', 'comp', 'fabric2', 'comp2', 'model', 'code', 'sizes'].forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener('input', () => { S[id] = el.value; render(); });
   });
@@ -734,6 +770,7 @@
   document.getElementById('zoomR').addEventListener('input', e => { S.zoomR = +e.target.value; render(); });
   document.getElementById('fabScale').addEventListener('input', e => { S.fabricSlot.scale = e.target.value / 100; render(); });
   document.getElementById('equalBadgeText').addEventListener('change', e => { S.equalBadgeText = e.target.checked; render(); });
+  document.getElementById('equalBadgeText2').addEventListener('change', e => { S.equalBadgeText2 = e.target.checked; render(); });
   document.getElementById('showZoom').addEventListener('change', e => { S.showZoom = e.target.checked; render(); });
   document.getElementById('logoStyle').addEventListener('change', e => { S.logoStyle = e.target.value; render(); });
   document.getElementById('logoScale').addEventListener('input', e => { S.logoScale = e.target.value / 100; render(); });
@@ -796,6 +833,7 @@
     box && xPt >= box.x && xPt <= box.x + box.w && yPt >= box.y && yPt <= box.y + box.h;
   const overLogo = (xPt, yPt) => insideBox(logoBounds(), xPt, yPt);
   const overBadge = (xPt, yPt) => insideBox(badgeBounds(), xPt, yPt);
+  const overBadge2 = (xPt, yPt) => insideBox(badgeBounds('badge2'), xPt, yPt);
   const overSizes = (xPt, yPt) => insideBox(sizesBounds(), xPt, yPt);
   const overModelCode = (xPt, yPt) => {
     const b = modelCodeBounds(mainCtx, K);
@@ -823,11 +861,16 @@
     S.logoY += move.y;
   }
 
-  function moveBadge(dx, dy) {
-    const move = clampedMove(badgeBounds(0), dx, dy);
+  function moveBadge(which, dx, dy) {
+    const move = clampedMove(badgeBounds(which, 0), dx, dy);
     if (!move) return;
-    S.badgeDx += move.x;
-    S.badgeDy += move.y;
+    if (which === 'badge2') {
+      S.badge2Dx += move.x;
+      S.badge2Dy += move.y;
+    } else {
+      S.badgeDx += move.x;
+      S.badgeDy += move.y;
+    }
   }
 
   function moveSizes(dx, dy) {
@@ -864,8 +907,15 @@
       return;
     }
 
+    if (overBadge2(xPt, yPt)) {
+      dragging = { type: 'badge', which: 'badge2' };
+      lastX = e.clientX; lastY = e.clientY;
+      cv.setPointerCapture(e.pointerId);
+      return;
+    }
+
     if (overBadge(xPt, yPt)) {
-      dragging = { type: 'badge' };
+      dragging = { type: 'badge', which: 'badge' };
       lastX = e.clientX; lastY = e.clientY;
       cv.setPointerCapture(e.pointerId);
       return;
@@ -902,7 +952,7 @@
     if (dragging.type === 'logo') {
       moveLogo(dx, dy);
     } else if (dragging.type === 'badge') {
-      moveBadge(dx, dy);
+      moveBadge(dragging.which, dx, dy);
     } else if (dragging.type === 'sizes') {
       moveSizes(dx, dy);
     } else if (dragging.type === 'modelCode') {
