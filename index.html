@@ -13,7 +13,8 @@
     --espresso-2:#2f2418;
     --cream:#f3e8d3;
     --paper:#e9dcc3;
-    --ink:#1e222f;
+    --navy:#0e0e55;
+    --ink:var(--navy);
     --red:#d14a44;
     --red-dark:#b53a34;
     --line:rgba(243,232,211,.14);
@@ -255,14 +256,14 @@
   <div class="stagenote">Live preview · 1472 × 2048</div>
 </main>
 
-<script src="logo.js"></script>
+<script src="logo.js?v=20260813"></script>
 <script>
 (() => {
   /* ════ geometry is in the .ai file's point space: page 690 × 959.76 pt ════ */
   const PW = 690, PH = 959.76;
   const H = 2048, K = H / PH, W = Math.round(PW * K); // 1472
 
-  const INK = '#1e222f', BLACK = '#000306', WHITE = '#ffffff';
+  const NAVY = '#0e0e55', INK = NAVY, BLACK = NAVY, WHITE = '#ffffff';
   const FONT = "Bahnschrift, 'Segoe UI', 'Arial Narrow', sans-serif";
 
   const cv = document.getElementById('card');
@@ -345,7 +346,7 @@
       g.addColorStop(0, '#dcb284'); g.addColorStop(1, '#c1925f');
       ctx.fillStyle = g;
       ctx.fillRect(D.P(rx), D.P(ry), D.P(rw), D.P(rh));
-      ctx.fillStyle = 'rgba(30,34,47,.45)';
+      ctx.fillStyle = 'rgba(14,14,85,.45)';
       ctx.font = `600 ${D.P(15)}px ${FONT}`;
       ctx.textAlign = 'center';
       ctx.fillText(placeholder, D.P(rx + rw / 2), D.P(ry + rh / 2));
