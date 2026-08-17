@@ -1,8 +1,3 @@
 # local extraction tooling — not part of the site
 *.py
 *.png
-
-# permanent brand assets used by the site
-!assets/
-!assets/milana-premium-navy.png
-!assets/milana-premium-white.png
